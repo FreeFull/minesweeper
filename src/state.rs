@@ -32,33 +32,59 @@ impl BoardState {
         // Make sure the clicked cell isn't a mine.
         self.cells.swap(0, index);
         for i in 0..self.cells.len() {
-            self.cells[i].neighbours = self.neighbours(i % self.width, i / self.width);
+            self.cells[i].neighbours = self
+                .neighbours(i % self.width, i / self.width)
+                .map(|index| self.cells[index].mine as u8)
+                .sum();
         }
     }
 
-    fn neighbours(&self, x: usize, y: usize) -> u8 {
-        fn try_index(state: &BoardState, x: isize, y: isize) -> u8 {
+    fn neighbours(&self, x: usize, y: usize) -> impl Iterator<Item = usize> {
+        fn try_index(state: &BoardState, x: isize, y: isize) -> Option<usize> {
             if x < 0 || x >= state.width as isize || y < 0 || y >= state.height as isize {
-                0
+                None
             } else {
-                if state.cells[x as usize + y as usize * state.width].mine {
-                    1
-                } else {
-                    0
-                }
+                Some(x as usize + y as usize * state.width)
             }
         }
 
-        let mut sum = 0;
+        let mut vec = Vec::with_capacity(8);
         for xoff in [-1, 0, 1] {
             for yoff in [-1, 0, 1] {
                 if (xoff == 0) && (yoff == 0) {
                     continue;
                 }
-                sum += try_index(self, x as isize + xoff, y as isize + yoff);
+                try_index(self, x as isize + xoff, y as isize + yoff).map(|index| vec.push(index));
             }
         }
-        sum
+        vec.into_iter()
+    }
+
+    fn reveal(&mut self, index: usize) {
+        if self.is_new_game {
+            self.generate(index);
+            self.is_new_game = false;
+        }
+        let mut to_reveal = vec![index];
+        while let Some(index) = to_reveal.pop() {
+            if !self.cells[index].flagged {
+                self.cells[index].visible = true;
+                if self.cells[index].neighbours == 0 {
+                    for new_index in self.neighbours(index % self.width, index / self.width) {
+                        if self.cells[new_index].visible == false {
+                            to_reveal.push(new_index);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fn flag(&mut self, index: usize) {
+        let cell = &mut self.cells[index];
+        if !cell.visible && !self.is_new_game {
+            cell.flagged = !cell.flagged;
+        }
     }
 }
 
@@ -77,20 +103,11 @@ impl Model for BoardState {
         if let Some(board_event) = event.message.downcast() {
             match *board_event {
                 BoardEvent::Reveal(index) => {
-                    if self.is_new_game {
-                        self.generate(index);
-                        self.is_new_game = false;
-                    }
-                    if !self.cells[index].flagged {
-                        self.cells[index].visible = true;
-                    }
+                    self.reveal(index);
                     entity.update(state);
                 }
                 BoardEvent::Flag(index) => {
-                    let cell = &mut self.cells[index];
-                    if !cell.visible && !self.is_new_game {
-                        cell.flagged = !cell.flagged;
-                    }
+                    self.flag(index);
                     entity.update(state);
                 }
             }
