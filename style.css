@@ -1,0 +1,36 @@
+body {
+    background-color: #cccccc;
+}
+
+.top_bar {
+    background-color: #777777;
+    border-width: 1px;
+    border-color: #222222;
+}
+
+.top_bar button{
+    background-color: #8b8b8b;
+    height: 100%;
+    width: 100px;
+    child-space: 1s;
+}
+
+board {
+    space: 1s;
+}
+
+cell {
+    background-color: #777777;
+    border-width: 0px;
+    child-space: 1s;
+    color: #ff6666;
+}
+
+cell.visible {
+    background-color: #999999;
+    color: black;
+}
+
+cell.mine {
+    background-color: #ff0000;
+}
