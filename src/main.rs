@@ -17,7 +17,7 @@ fn main() {
             builder.class("top_bar").set_height(Pixels(30.0))
         });
         Button::with_label("New Game")
-            .on_press(move |_, state, entity| {
+            .on_press(move |_, state, _entity| {
                 NewGame {
                     width: 9,
                     height: 9,

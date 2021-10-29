@@ -24,7 +24,7 @@ impl BoardState {
         }
     }
 
-    fn generate(&mut self, state: &mut State, entity: Entity, index: usize) {
+    fn generate(&mut self, index: usize) {
         for i in 1..std::cmp::min(self.total_mines + 1, self.cells.len()) {
             self.cells[i].mine = true;
         }
@@ -64,15 +64,11 @@ impl BoardState {
 
 impl Model for BoardState {
     fn on_event(&mut self, state: &mut State, entity: Entity, event: &mut Event) {
-        if let Some(
-            &mut game
-            @
-            NewGame {
-                width,
-                height,
-                mines,
-            },
-        ) = event.message.downcast()
+        if let Some(&mut NewGame {
+            width,
+            height,
+            mines,
+        }) = event.message.downcast()
         {
             *self = BoardState::new(width, height, mines);
             entity.update(state);
@@ -82,7 +78,7 @@ impl Model for BoardState {
             match *board_event {
                 BoardEvent::Reveal(index) => {
                     if self.is_new_game {
-                        self.generate(state, entity, index);
+                        self.generate(index);
                         self.is_new_game = false;
                     }
                     if !self.cells[index].flagged {
