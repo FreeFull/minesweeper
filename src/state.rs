@@ -103,8 +103,23 @@ impl BoardState {
 
     fn flag(&mut self, index: usize) {
         let cell = &mut self.cells[index];
-        if !cell.visible && !self.is_new_game {
-            cell.flagged = !cell.flagged;
+        if !self.is_new_game {
+            if !cell.visible {
+                cell.flagged = !cell.flagged;
+            } else {
+                let neighbours = self.neighbours(index);
+                // All non-mine neighbours are visible
+                if (8 - self.cells[index].neighbours)
+                    == neighbours
+                        .iter()
+                        .map(|&i| self.cells[i].visible as u8)
+                        .sum()
+                {
+                    for &i in &neighbours {
+                        self.cells[i].flagged = !self.cells[i].visible;
+                    }
+                }
+            }
         }
     }
 }
