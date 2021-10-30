@@ -40,6 +40,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "000444226fcff248f2bc4c7625be32c63caccfecc2723a2b9f78a7487a49c407"
 
 [[package]]
+name = "arrayvec"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8da52d66c7071e2e3fa2a1e5c6d088fec47b593032b254f5e980de8ea54454d6"
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -777,6 +783,7 @@ dependencies = [
 name = "minesweeper"
 version = "0.1.0"
 dependencies = [
+ "arrayvec",
  "rand 0.8.4",
  "tuix",
 ]
@@ -824,7 +831,7 @@ dependencies = [
 [[package]]
 name = "morphorm"
 version = "0.2.0"
-source = "git+https://github.com/geom3trik/morphorm#c0eb473f5483e9a55aad125263ab80526e2b63e3"
+source = "git+https://github.com/geom3trik/morphorm#df4129d0e4fa390e92ede1a303aeeae71be5d3f4"
 dependencies = [
  "bitflags",
  "smallvec",

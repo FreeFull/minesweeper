@@ -1,3 +1,4 @@
+use arrayvec::ArrayVec;
 use rand::prelude::*;
 use tuix::*;
 
@@ -24,22 +25,23 @@ impl BoardState {
         }
     }
 
-    fn generate(&mut self, index: usize) {
+    fn generate(&mut self, clicked: usize) {
         for i in 1..std::cmp::min(self.total_mines + 1, self.cells.len()) {
             self.cells[i].mine = true;
         }
         self.cells[1..].shuffle(&mut thread_rng());
         // Make sure the clicked cell isn't a mine.
-        self.cells.swap(0, index);
+        self.cells.swap(0, clicked);
         for i in 0..self.cells.len() {
             self.cells[i].neighbours = self
-                .neighbours(i % self.width, i / self.width)
+                .neighbours(i)
+                .into_iter()
                 .map(|index| self.cells[index].mine as u8)
                 .sum();
         }
     }
 
-    fn neighbours(&self, x: usize, y: usize) -> impl Iterator<Item = usize> {
+    fn neighbours(&self, index: usize) -> ArrayVec<usize, 8> {
         fn try_index(state: &BoardState, x: isize, y: isize) -> Option<usize> {
             if x < 0 || x >= state.width as isize || y < 0 || y >= state.height as isize {
                 None
@@ -48,7 +50,9 @@ impl BoardState {
             }
         }
 
-        let mut vec = Vec::with_capacity(8);
+        let x = index % self.width;
+        let y = index / self.width;
+        let mut vec = ArrayVec::new();
         for xoff in [-1, 0, 1] {
             for yoff in [-1, 0, 1] {
                 if (xoff == 0) && (yoff == 0) {
@@ -57,24 +61,41 @@ impl BoardState {
                 try_index(self, x as isize + xoff, y as isize + yoff).map(|index| vec.push(index));
             }
         }
-        vec.into_iter()
+        vec
     }
 
     fn reveal(&mut self, index: usize) {
+        fn make_visible(state: &mut BoardState, index: usize) {
+            let mut to_reveal = vec![index];
+            while let Some(current) = to_reveal.pop() {
+                if !state.cells[current].flagged {
+                    state.cells[current].visible = true;
+                    if state.cells[current].neighbours == 0 {
+                        for new_index in state.neighbours(current) {
+                            if state.cells[new_index].visible == false {
+                                to_reveal.push(new_index);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         if self.is_new_game {
             self.generate(index);
             self.is_new_game = false;
         }
-        let mut to_reveal = vec![index];
-        while let Some(index) = to_reveal.pop() {
-            if !self.cells[index].flagged {
-                self.cells[index].visible = true;
-                if self.cells[index].neighbours == 0 {
-                    for new_index in self.neighbours(index % self.width, index / self.width) {
-                        if self.cells[new_index].visible == false {
-                            to_reveal.push(new_index);
-                        }
-                    }
+        if !self.cells[index].visible {
+            make_visible(self, index);
+        } else {
+            let neighbours = self.neighbours(index);
+            if self.cells[index].neighbours
+                == neighbours
+                    .iter()
+                    .map(|&i| self.cells[i].flagged as u8)
+                    .sum()
+            {
+                for &i in neighbours.iter() {
+                    make_visible(self, i);
                 }
             }
         }
