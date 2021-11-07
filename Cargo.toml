@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 arrayvec = "0.7.2"
 rand = "0.8.4"
-tuix = { git = "https://github.com/geom3trik/tuix.git", features = ["rounding"] }
+vizia = { git = "https://github.com/geom3trik/VIZIA.git" }

@@ -1,4 +1,4 @@
-body {
+.body {
     background-color: #cccccc;
 }
 
@@ -15,22 +15,22 @@ body {
     child-space: 1s;
 }
 
-board {
+.board {
     space: 1s;
 }
 
-cell {
+.cell {
     background-color: #777777;
     border-width: 0px;
     child-space: 1s;
     color: #ff6666;
 }
 
-cell.visible {
+.cell.visible {
     background-color: #999999;
     color: black;
 }
 
-cell.mine {
+.cell.mine {
     background-color: #ff0000;
 }

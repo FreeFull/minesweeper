@@ -1,6 +1,6 @@
 use arrayvec::ArrayVec;
 use rand::prelude::*;
-use tuix::*;
+use vizia::*;
 
 use crate::NewGame;
 
@@ -9,7 +9,7 @@ pub struct BoardState {
     pub cells: Vec<CellState>,
     pub width: usize,
     pub height: usize,
-    pub is_new_game: bool,
+    pub new_game: bool,
     pub total_mines: usize,
 }
 
@@ -20,7 +20,7 @@ impl BoardState {
             cells: vec![CellState::default(); width * height],
             width,
             height,
-            is_new_game: true,
+            new_game: true,
             total_mines: mines,
         }
     }
@@ -80,9 +80,9 @@ impl BoardState {
                 }
             }
         }
-        if self.is_new_game {
+        if self.new_game {
             self.generate(index);
-            self.is_new_game = false;
+            self.new_game = false;
         }
         if !self.cells[index].visible {
             make_visible(self, index);
@@ -103,7 +103,7 @@ impl BoardState {
 
     fn flag(&mut self, index: usize) {
         let cell = &mut self.cells[index];
-        if !self.is_new_game {
+        if !self.new_game {
             if !cell.visible {
                 cell.flagged = !cell.flagged;
             } else {
@@ -125,29 +125,31 @@ impl BoardState {
 }
 
 impl Model for BoardState {
-    fn on_event(&mut self, state: &mut State, entity: Entity, event: &mut Event) {
+    fn event(&mut self, cx: &mut Context, event: &mut Event) -> bool {
         if let Some(&mut NewGame {
             width,
             height,
             mines,
         }) = event.message.downcast()
         {
+            println!("New Game");
+            dbg!(width, height, mines);
             *self = BoardState::new(width, height, mines);
-            entity.update(state);
+            return true;
         }
 
         if let Some(board_event) = event.message.downcast() {
             match *board_event {
                 BoardEvent::Reveal(index) => {
                     self.reveal(index);
-                    entity.update(state);
                 }
                 BoardEvent::Flag(index) => {
                     self.flag(index);
-                    entity.update(state);
                 }
             }
+            return true;
         }
+        false
     }
 }
 
@@ -159,6 +161,7 @@ pub struct CellState {
     pub neighbours: u8,
 }
 
+#[derive(Debug)]
 pub enum BoardEvent {
     Reveal(usize),
     Flag(usize),
