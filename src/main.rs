@@ -3,7 +3,6 @@ use vizia::*;
 use crate::state::BoardState;
 
 mod board;
-mod scorebar;
 mod state;
 
 fn main() {
