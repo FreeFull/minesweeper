@@ -58,7 +58,9 @@ impl BoardState {
                 if (xoff == 0) && (yoff == 0) {
                     continue;
                 }
-                try_index(self, x as isize + xoff, y as isize + yoff).map(|index| vec.push(index));
+                if let Some(index) = try_index(self, x as isize + xoff, y as isize + yoff) {
+                    vec.push(index);
+                }
             }
         }
         vec
@@ -72,7 +74,7 @@ impl BoardState {
                     state.cells[current].visible = true;
                     if state.cells[current].neighbours == 0 {
                         for new_index in state.neighbours(current) {
-                            if state.cells[new_index].visible == false {
+                            if !state.cells[new_index].visible {
                                 to_reveal.push(new_index);
                             }
                         }
@@ -125,15 +127,13 @@ impl BoardState {
 }
 
 impl Model for BoardState {
-    fn event(&mut self, cx: &mut Context, event: &mut Event) -> bool {
+    fn event(&mut self, _cx: &mut Context, event: &mut Event) -> bool {
         if let Some(&mut NewGame {
             width,
             height,
             mines,
         }) = event.message.downcast()
         {
-            println!("New Game");
-            dbg!(width, height, mines);
             *self = BoardState::new(width, height, mines);
             return true;
         }
@@ -141,11 +141,9 @@ impl Model for BoardState {
         if let Some(board_event) = event.message.downcast() {
             match *board_event {
                 BoardEvent::Reveal(index) => {
-                    println!("Reveal caught");
                     self.reveal(index);
                 }
                 BoardEvent::Flag(index) => {
-                    println!("Flag caught");
                     self.flag(index);
                 }
             }

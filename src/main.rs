@@ -7,7 +7,6 @@ mod scorebar;
 mod state;
 
 fn main() {
-    let description = WindowDescription::new().with_title("Minesweeper");
     let app = Application::new(|cx| {
         let _ = cx.add_stylesheet("style.css");
         state::BoardState::new(11, 11, 10).build(cx);

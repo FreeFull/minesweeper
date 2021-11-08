@@ -30,6 +30,10 @@
     color: #ff6666;
 }
 
+.cell.flagged {
+    background-color: #ff6666;
+}
+
 .cell.visible {
     background-color: #999999;
     color: black;
