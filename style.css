@@ -1,16 +1,21 @@
 .body {
-    background-color: #cccccc;
+    background-color: #555555;
+    width: 1s;
+    height: 1s;
 }
 
-.top_bar {
+.top-bar {
     background-color: #777777;
     border-width: 1px;
     border-color: #222222;
+    height: 30px;
+    width: 100%;
 }
 
-.top_bar button{
-    background-color: #8b8b8b;
-    height: 100%;
+.top-bar button {
+    background-color: #8ba08b;
+    min-height: 0;
+    height: 1s;
     width: 100px;
     child-space: 1s;
 }
@@ -21,7 +26,6 @@
 
 .cell {
     background-color: #777777;
-    border-width: 0px;
     child-space: 1s;
     color: #ff6666;
 }

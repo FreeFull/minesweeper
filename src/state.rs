@@ -141,9 +141,11 @@ impl Model for BoardState {
         if let Some(board_event) = event.message.downcast() {
             match *board_event {
                 BoardEvent::Reveal(index) => {
+                    println!("Reveal caught");
                     self.reveal(index);
                 }
                 BoardEvent::Flag(index) => {
+                    println!("Flag caught");
                     self.flag(index);
                 }
             }
@@ -153,7 +155,7 @@ impl Model for BoardState {
     }
 }
 
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct CellState {
     pub visible: bool,
     pub flagged: bool,
